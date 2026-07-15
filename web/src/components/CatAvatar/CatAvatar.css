@@ -1,0 +1,110 @@
+.cat-avatar {
+  overflow: visible;
+}
+
+/* ── idle ── */
+.cat-eye-group {
+  animation: cat-blink 5s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes cat-blink {
+  0%, 82%, 100% { transform: scaleY(1); }
+  88%           { transform: scaleY(0.07); }
+}
+
+.cat-ear-left {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+
+.cat-ear-right {
+  animation: cat-ear-twitch 9s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+
+.cat-body {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes cat-ear-twitch {
+  0%, 65%, 100% { transform: rotate(0deg); }
+  70%           { transform: rotate(-10deg); }
+  76%           { transform: rotate(4deg); }
+  82%           { transform: rotate(0deg); }
+}
+
+/* ── login success: ear perk + bounce ── */
+.cat-avatar--success .cat-body {
+  animation: body-bounce 0.7s ease-out !important;
+}
+
+@keyframes body-bounce {
+  0%   { transform: scale(1); }
+  28%  { transform: scale(1.09); }
+  52%  { transform: scale(0.96); }
+  72%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+.cat-avatar--success .cat-ear-left {
+  animation: ear-perk-left 0.7s ease-out !important;
+}
+
+.cat-avatar--success .cat-ear-right {
+  animation: ear-perk-right 0.7s ease-out !important;
+}
+
+@keyframes ear-perk-left {
+  0%, 100% { transform: rotate(0deg); }
+  28%      { transform: rotate(14deg); }
+}
+
+@keyframes ear-perk-right {
+  0%, 100% { transform: rotate(0deg); }
+  28%      { transform: rotate(-14deg); }
+}
+
+/* ── login fail: wide eyes + ears back + head shake ── */
+.cat-avatar--fail .cat-eye-group {
+  animation: wide-eyes 1.3s ease-in-out forwards !important;
+}
+
+@keyframes wide-eyes {
+  0%, 100% { transform: scaleY(1); }
+  15%, 80% { transform: scaleY(1.35); }
+}
+
+.cat-avatar--fail .cat-ear-left {
+  animation: ear-back-left 1.3s ease-in-out forwards !important;
+}
+
+.cat-avatar--fail .cat-ear-right {
+  animation: ear-back-right 1.3s ease-in-out forwards !important;
+}
+
+@keyframes ear-back-left {
+  0%, 100% { transform: rotate(0deg); }
+  20%, 80% { transform: rotate(-22deg); }
+}
+
+@keyframes ear-back-right {
+  0%, 100% { transform: rotate(0deg); }
+  20%, 80% { transform: rotate(22deg); }
+}
+
+.cat-avatar--fail .cat-body {
+  animation: head-shake 0.5s ease-in-out !important;
+}
+
+@keyframes head-shake {
+  0%, 100% { transform: translateX(0); }
+  18%      { transform: translateX(-4px); }
+  36%      { transform: translateX(4px); }
+  54%      { transform: translateX(-3px); }
+  72%      { transform: translateX(2px); }
+  88%      { transform: translateX(-1px); }
+}

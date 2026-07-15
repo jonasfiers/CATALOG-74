@@ -1,0 +1,10 @@
+.env
+.env.local
+web/.env.local
+node_modules/
+web/node_modules/
+web/dist/
+api/package-lock.json
+.DS_Store
+.idea/
+.junie/

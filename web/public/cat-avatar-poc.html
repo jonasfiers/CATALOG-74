@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cat Avatar — Animation POC</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      background: #eeebf7;
+      font-family: system-ui, sans-serif;
+    }
+
+    .cat-avatar {
+      width: 160px;
+      height: 160px;
+    }
+
+    /* ── idle ── */
+    .cat-eye-group {
+      animation: cat-blink 5s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    @keyframes cat-blink {
+      0%, 82%, 100% { transform: scaleY(1); }
+      88%           { transform: scaleY(0.07); }
+    }
+
+    .cat-ear-left {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+    }
+
+    .cat-ear-right {
+      animation: cat-ear-twitch 9s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: bottom center;
+    }
+
+    .cat-body {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    @keyframes cat-ear-twitch {
+      0%, 65%, 100% { transform: rotate(0deg); }
+      70%           { transform: rotate(-10deg); }
+      76%           { transform: rotate(4deg); }
+      82%           { transform: rotate(0deg); }
+    }
+
+    /* ── login success: ear perk + bounce ── */
+    .login-success .cat-body {
+      animation: body-bounce 0.7s ease-out !important;
+    }
+
+    @keyframes body-bounce {
+      0%   { transform: scale(1); }
+      28%  { transform: scale(1.09); }
+      52%  { transform: scale(0.96); }
+      72%  { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    .login-success .cat-ear-left {
+      animation: ear-perk-left 0.7s ease-out !important;
+    }
+
+    .login-success .cat-ear-right {
+      animation: ear-perk-right 0.7s ease-out !important;
+    }
+
+    @keyframes ear-perk-left {
+      0%, 100% { transform: rotate(0deg); }
+      28%      { transform: rotate(14deg); }
+    }
+
+    @keyframes ear-perk-right {
+      0%, 100% { transform: rotate(0deg); }
+      28%      { transform: rotate(-14deg); }
+    }
+
+    /* ── login fail: wide eyes + ears back + head shake ── */
+    .login-fail .cat-eye-group {
+      animation: wide-eyes 1.3s ease-in-out forwards !important;
+    }
+
+    @keyframes wide-eyes {
+      0%, 100% { transform: scaleY(1); }
+      15%, 80% { transform: scaleY(1.35); }
+    }
+
+    .login-fail .cat-ear-left {
+      animation: ear-back-left 1.3s ease-in-out forwards !important;
+    }
+
+    .login-fail .cat-ear-right {
+      animation: ear-back-right 1.3s ease-in-out forwards !important;
+    }
+
+    @keyframes ear-back-left {
+      0%, 100% { transform: rotate(0deg); }
+      20%, 80% { transform: rotate(-22deg); }
+    }
+
+    @keyframes ear-back-right {
+      0%, 100% { transform: rotate(0deg); }
+      20%, 80% { transform: rotate(22deg); }
+    }
+
+    .login-fail .cat-body {
+      animation: head-shake 0.5s ease-in-out !important;
+    }
+
+    @keyframes head-shake {
+      0%, 100% { transform: translateX(0); }
+      18%      { transform: translateX(-4px); }
+      36%      { transform: translateX(4px); }
+      54%      { transform: translateX(-3px); }
+      72%      { transform: translateX(2px); }
+      88%      { transform: translateX(-1px); }
+    }
+
+    /* ── buttons ── */
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .controls button {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .controls button:hover  { opacity: 0.88; }
+    .controls button:active { transform: scale(0.96); }
+
+    .btn-success { background: #6C63FF; color: #fff; }
+    .btn-fail    { background: #E05C5C; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <svg class="cat-avatar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+    <circle cx="24" cy="24" r="24" fill="#F5EDE0"/>
+
+    <g class="cat-body">
+      <g class="cat-ear-left">
+        <polygon points="10,18 14,8 20,18" fill="#F5A623"/>
+        <polygon points="12,17 14,10 18,17" fill="#F07167"/>
+      </g>
+
+      <g class="cat-ear-right">
+        <polygon points="28,18 34,8 38,18" fill="#F5A623"/>
+        <polygon points="30,17 34,10 36,17" fill="#F07167"/>
+      </g>
+
+      <circle cx="24" cy="28" r="16" fill="#F5A623"/>
+
+      <g class="cat-eye-group cat-eye-left">
+        <ellipse cx="19" cy="27" rx="2.5" ry="3" fill="#2C1A0E"/>
+        <circle cx="20" cy="26" r="0.9" fill="white"/>
+      </g>
+
+      <g class="cat-eye-group cat-eye-right">
+        <ellipse cx="29" cy="27" rx="2.5" ry="3" fill="#2C1A0E"/>
+        <circle cx="30" cy="26" r="0.9" fill="white"/>
+      </g>
+
+      <ellipse cx="24" cy="32" rx="1.5" ry="1.1" fill="#F07167"/>
+
+      <line x1="8"  y1="30" x2="19" y2="32" stroke="#2C1A0E" stroke-width="0.7" opacity="0.4"/>
+      <line x1="8"  y1="33" x2="19" y2="33" stroke="#2C1A0E" stroke-width="0.7" opacity="0.4"/>
+      <line x1="29" y1="32" x2="40" y2="30" stroke="#2C1A0E" stroke-width="0.7" opacity="0.4"/>
+      <line x1="29" y1="33" x2="40" y2="33" stroke="#2C1A0E" stroke-width="0.7" opacity="0.4"/>
+    </g>
+  </svg>
+
+  <div class="controls">
+    <button class="btn-success">Login success</button>
+    <button class="btn-fail">Login failed</button>
+  </div>
+
+  <script>
+    const avatar = document.querySelector('.cat-avatar')
+    const DURATION = { success: 700, fail: 1300 }
+    const CLASSES  = ['login-success', 'login-fail']
+    let timer = null
+
+    function trigger(state) {
+      clearTimeout(timer)
+      avatar.classList.remove(...CLASSES)
+      void avatar.offsetWidth
+      avatar.classList.add(`login-${state}`)
+      timer = setTimeout(() => avatar.classList.remove(`login-${state}`), DURATION[state])
+    }
+
+    document.querySelector('.btn-success').addEventListener('click', () => trigger('success'))
+    document.querySelector('.btn-fail').addEventListener('click',    () => trigger('fail'))
+  </script>
+
+</body>
+</html>

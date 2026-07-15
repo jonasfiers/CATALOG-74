@@ -1,0 +1,86 @@
+services:
+
+  # Neo4j Service
+  neo4j:
+    image: neo4j:latest
+    container_name: splitty_neo4j
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - splitty-network
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Service
+  api:
+    image: splitty_api:latest
+    container_name: splitty_api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - splitty-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Web Service
+  web:
+    image: splitty_web:latest
+    container_name: splitty_web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:80:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - splitty-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # Cloudflare Tunnel
+  # Securely exposes the web service to the internet without opening host ports.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: splitty_tunnel
+    restart: unless-stopped
+    command: tunnel run --protocol http2
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - splitty-network
+
+networks:
+  splitty-network:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
