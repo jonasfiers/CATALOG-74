@@ -53,6 +53,18 @@ npm run dev                                 # api on :3000, web on :5173
 
 The web dev server proxies `/api` to the API — override the target with `VITE_API_TARGET` if it's not running at `http://api:3000`.
 
+## Backups
+
+Neo4j Community Edition doesn't support online (zero-downtime) backups — that's an Enterprise-only feature. `scripts/backup-neo4j.sh` briefly stops the `neo4j` container, tars up the `neo4j_data` volume, and starts it back up. Assumes the stack lives at `/opt/splitty` and the volume is named `splitty_neo4j_data`; adjust if yours differs.
+
+Run nightly via cron, logging output so failures don't go unnoticed:
+
+```
+0 3 * * * /opt/splitty/scripts/backup-neo4j.sh >> /var/log/neo4j-backup.log 2>&1
+```
+
+Backups older than 14 days are pruned automatically. This only protects against data loss, not host loss — the tarballs land on the same machine, so copying them elsewhere is left as an exercise for whoever's reading this.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
