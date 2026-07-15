@@ -7,8 +7,6 @@ const NAV_ITEMS = [
   { to: '/groups',     end: true, label: 'Home',       icon: HomeIcon       },
   { to: '/activity',             label: 'Activity',   icon: ActivityIcon   },
   { to: '/insights',             label: 'Insights',   icon: InsightsIcon   },
-  { to: '/categories',           label: 'Categories', icon: FriendsIcon    },
-  { to: '/currencies',           label: 'Currencies', icon: CurrenciesIcon },
 ]
 
 function HomeIcon({ size = 20 }) {
@@ -24,27 +22,6 @@ function ActivityIcon({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-    </svg>
-  )
-}
-
-function FriendsIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1"/>
-      <rect x="14" y="3" width="7" height="7" rx="1"/>
-      <rect x="3" y="14" width="7" height="7" rx="1"/>
-      <rect x="14" y="14" width="7" height="7" rx="1"/>
-    </svg>
-  )
-}
-
-function CurrenciesIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M14.5 8.5a3.5 3.5 0 0 0-5 0v7a3.5 3.5 0 0 0 5 0"/>
-      <line x1="9" y1="12" x2="15" y2="12"/>
     </svg>
   )
 }
