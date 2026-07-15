@@ -4,16 +4,27 @@ Splitwise, but the balances are a graph. A self-hosted expense-splitting app whe
 
 Built mostly as an excuse to get properly hands-on with graph data modeling.
 
+**Live:** [splitty.jonasfiers.eu](https://splitty.jonasfiers.eu)
+
+![Group overview — Cabin weekend](docs/screenshot-group.png)
+![Expense detail with per-person split](docs/screenshot-expense.png)
+
 ## How it's modeled
 
-Instead of a `Person -[:OWES]-> Person` edge, every expense is its own node:
+The obvious schema is `(:Person)-[:OWES {amount}]->(:Person)` — and it's a trap. Every new expense means finding, updating, or deleting edges between every pair involved, and the moment an update is missed, your balances silently drift from reality.
+
+Instead, every expense is its own node, and nothing else is stored:
 
 ```cypher
 MATCH (payer:User)-[:PAID]->(e:Expense)-[o:OWED_BY]->(u:User)
 RETURN payer, e, o, u
 ```
 
-Balances between two people are summed on the fly from every `PAID`/`OWED_BY` pair across their shared groups. Settlements aren't a separate concept — they're just another `Expense` node (`isSettlement: true`).
+You paid €96 for the cabin weekend; Mila owes €32, Theo owes €40. That's one `Expense` node, one `PAID` relationship in, two `OWED_BY` relationships out.
+
+**Balances are derived, never stored.** What Mila owes you is summed on the fly from every `PAID`/`OWED_BY` pair across your shared groups. There's no balance field to keep in sync, so there's nothing to drift, and the full history of *why* a balance is what it is stays queryable.
+
+**Settlements aren't a separate concept.** Paying someone back is just another `Expense` node (`isSettlement: true`) — the same traversal that computes balances handles them for free.
 
 ## Features
 
@@ -68,3 +79,7 @@ Backups older than 14 days are pruned automatically. This only protects against 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+Built by [Jonas Fiers](https://www.jonasfiers.eu) — software engineer in Ghent, usually somewhere between low-code platforms and graph databases.
