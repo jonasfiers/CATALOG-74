@@ -11,6 +11,11 @@ services:
     environment:
       - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
+      # Sized for a 2GB host, matching what's already tuned on the server.
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=1g
+      - NEO4J_server_memory_pagecache_size=256m
+    mem_limit: 1.5g
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -24,6 +29,8 @@ services:
 
   # API Service
   api:
+    build:
+      context: ./api
     image: splitty_api:latest
     container_name: splitty_api
     restart: unless-stopped
@@ -45,11 +52,13 @@ services:
 
   # Web Service
   web:
+    build:
+      context: ./web
     image: splitty_web:latest
     container_name: splitty_web
     restart: unless-stopped
     ports:
-      - "127.0.0.1:80:80"
+      - "80:80"
     depends_on:
       api:
         condition: service_healthy
@@ -62,23 +71,9 @@ services:
       retries: 5
       start_period: 5s
 
-  # Cloudflare Tunnel
-  # Securely exposes the web service to the internet without opening host ports.
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    container_name: splitty_tunnel
-    restart: unless-stopped
-    command: tunnel run --protocol http2
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-    depends_on:
-      web:
-        condition: service_healthy
-    networks:
-      - splitty-network
-
 networks:
   splitty-network:
+    name: splitty-network
     driver: bridge
 
 volumes:

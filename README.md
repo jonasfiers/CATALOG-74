@@ -29,7 +29,7 @@ Balances between two people are summed on the fly from every `PAID`/`OWED_BY` pa
 
 - **API** — Node.js, Express, Neo4j (`neo4j-driver` + APOC), JWT, WebAuthn, `web-push`, Nodemailer
 - **Web** — React, Vite, React Router, Recharts
-- **Infra** — Docker Compose, Cloudflare Tunnel, Nginx
+- **Infra** — Docker Compose, Nginx (public exposure is left to you — a host-level Cloudflare Tunnel, reverse proxy, etc.)
 
 ## Running it
 
@@ -37,8 +37,10 @@ Balances between two people are summed on the fly from every `PAID`/`OWED_BY` pa
 
 ```bash
 cp .env.example .env   # fill in the values
-docker compose up -d
+docker compose up -d --build
 ```
+
+This brings up Neo4j, the API, and the web server — it doesn't expose anything to the internet. That's intentionally left to whatever you're already using on the host (Cloudflare Tunnel, a reverse proxy, etc.).
 
 ### Local dev
 
