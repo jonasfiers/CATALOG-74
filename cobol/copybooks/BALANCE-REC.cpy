@@ -7,5 +7,5 @@
            05  USER-ID             PIC 9(6).
            05  TOTAL-PAID          PIC 9(7)V99.
            05  TOTAL-OWED          PIC 9(7)V99.
-           05  NET-BALANCE         PIC S9(7)V99.
+           05  NET-BALANCE         PIC S9(7)V99 SIGN IS TRAILING SEPARATE.
            05  AS-OF-TIMESTAMP     PIC 9(14).
