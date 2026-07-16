@@ -142,7 +142,7 @@ export default function ExpenseFormPage() {
       let expenseId = id
       if (isEdit) {
         await client.put(`/expenses/${id}`, payload)
-        const { data: old } = await client.get(`/shares/expense/${id}/excludePayer`)
+        const { data: old } = await client.get(`/shares/expense/${id}`)
         await Promise.all(
           (old.shares || []).map(s =>
             client.delete(`/shares/expense/${id}/user/${s.userId}`)
@@ -153,9 +153,14 @@ export default function ExpenseFormPage() {
         expenseId = data.id
       }
 
+      // The payer's own portion of the expense is a real share too --
+      // it's what's left of the total after everyone else's cut, the
+      // same amount a live PAID/OWED_BY graph traversal would derive
+      // on the fly. Batch aggregation can't derive it on the fly (see
+      // CALC-OWED/CALC-PAID), so it has to be written down here.
       await Promise.all(
         shares
-          .filter(s => s.included && s.userId !== form.paidByUserId && s.amount !== '' && parseFloat(s.amount) > 0)
+          .filter(s => s.included && s.amount !== '' && parseFloat(s.amount) > 0)
           .map(s =>
             client.post('/shares', {
               expenseId,

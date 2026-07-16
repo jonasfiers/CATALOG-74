@@ -21,8 +21,18 @@ before being committed.
 running `EXPENSE-MASTER.DAT` and `SHARE-TRANS.DAT` through the actual
 batch pipeline (`cobol/scripts/run-batch.sh`) once, so the demo starts
 "warm" with correct balances already visible instead of an empty state
-until the first nightly run:
+until the first nightly run.
 
-- **You** paid €96.00, owes nothing → net **+€96.00**
+`SHARE-TRANS.DAT` has three rows for the one €96 "Cabin weekend"
+expense, not two — Mila owes €32, Theo owes €40, **and You owe
+yourself €24**, your own share of what you paid. A live PAID/OWED_BY
+graph traversal derives that figure on the fly and never stores it;
+CALC-OWED can't (it's a one-pass sum over whatever's actually in the
+file), so the write path has to hand it a real row instead. Leave it
+out and the ledger stops summing to zero — every payer's balance
+silently overstates their credit by exactly their own share of
+everything they've ever paid for.
+
+- **You** paid €96.00, own share €24.00 → net **+€72.00**
 - **Mila** owes €32.00, paid nothing → net **−€32.00**
 - **Theo** owes €40.00, paid nothing → net **−€40.00**

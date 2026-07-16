@@ -27,14 +27,6 @@ router.get('/expense/:id', (req, res) => {
   res.json({ shares })
 })
 
-router.get('/expense/:id/excludePayer', (req, res) => {
-  const expense = findExpenseById(req.params.id)
-  const shares = sharesOfExpense(req.params.id)
-    .filter(s => !expense || s.owerId !== expense.payerId)
-    .map(s => ({ userId: s.owerId, amount: s.amount }))
-  res.json({ shares })
-})
-
 router.delete('/expense/:id/user/:userId', (req, res) => {
   const all = readShares()
   const remaining = all.filter(
