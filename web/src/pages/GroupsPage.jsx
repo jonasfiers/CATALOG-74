@@ -12,7 +12,7 @@ import Loading from '../components/Loading.jsx'
 export default function GroupsPage() {
   const navigate = useNavigate()
   const { currentUser } = useAuth()
-  const [balance, setBalance] = useState({ balanceOwed: 0, balanceLent: 0, grossOwed: 0, grossLent: 0 })
+  const [balance, setBalance] = useState({ balanceOwed: 0, balanceLent: 0 })
   const [groups, setGroups] = useState([])
   const [currencies, setCurrencies] = useState([])
   const [showNewGroup, setShowNewGroup] = useState(false)
@@ -28,11 +28,9 @@ export default function GroupsPage() {
         const curs = cr.data.currencies || []
         setCurrencies(curs)
         if (curs.length > 0) setForm(f => ({ ...f, currencyIso: curs[0].iso }))
-        setBalance({ 
-          balanceOwed: Number(bal.data.balanceOwed ?? 0), 
+        setBalance({
+          balanceOwed: Number(bal.data.balanceOwed ?? 0),
           balanceLent: Number(bal.data.balanceLent ?? 0),
-          grossOwed: Number(bal.data.grossOwed ?? 0),
-          grossLent: Number(bal.data.grossLent ?? 0)
         })
       })
         .catch((err) => {
@@ -72,65 +70,25 @@ export default function GroupsPage() {
       {/* balance */}
       <div className="balance-banner">
         {(() => {
-          const netTotal = balance.balanceLent + balance.balanceOwed
-          const grossTotal = balance.grossLent + balance.grossOwed
           const net = balance.balanceLent - balance.balanceOwed
-          const isSettled = netTotal < 0.01
-          const pct = grossTotal > 0.01 ? (balance.grossLent / grossTotal) * 100 : 50
+          const isSettled = balance.balanceLent + balance.balanceOwed < 0.01
 
           return (
-            <>
-              <div className="balance-content" style={{ paddingBottom: isSettled ? 48 : 32 }}>
-                {isSettled ? (
-                  <div className="balance-settled-info">
-                    <span className="balance-settled-icon">🎉</span>
-                    <div className="balance-settled-text">You're all settled up!</div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="balance-col">
-                      <span className="balance-lbl">You paid</span>
-                      <span className="balance-amt positive">{formatCurrency(balance.grossLent)}</span>
-                    </div>
-                    <div className="balance-divider" />
-                    <div className="balance-col" style={{ alignItems: 'flex-end', textAlign: 'right' }}>
-                      <span className="balance-lbl">You borrowed</span>
-                      <span className="balance-amt negative">{formatCurrency(balance.grossOwed)}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div className={`balance-bar-track ${isSettled ? 'settled' : ''}`}>
-                <div 
-                  className={`balance-net-marker ${isSettled ? 'settled' : net > 0 ? 'positive' : net < 0 ? 'negative' : ''}`}
-                  style={{ left: `clamp(35px, ${pct}%, calc(100% - 35px))` }}
-                >
-                  {isSettled ? (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                      Settled
-                    </span>
-                  ) : (
-                    <>{net > 0 ? '+' : ''}{formatCurrency(net)}</>
-                  )}
+            <div className="balance-content">
+              {isSettled ? (
+                <div className="balance-settled-info">
+                  <span className="balance-settled-icon">🎉</span>
+                  <div className="balance-settled-text">You're all settled up!</div>
                 </div>
-                {!isSettled && (
-                  <>
-                    <div 
-                      className="balance-bar positive" 
-                      style={{ flex: balance.grossLent, minWidth: balance.grossLent > 0 ? 4 : 0 }} 
-                    />
-                    <div 
-                      className="balance-bar negative" 
-                      style={{ flex: balance.grossOwed, minWidth: balance.grossOwed > 0 ? 4 : 0 }} 
-                    />
-                  </>
-                )}
-              </div>
-            </>
+              ) : (
+                <div className="balance-col">
+                  <span className="balance-lbl">{net > 0 ? "You're owed" : 'You owe'}</span>
+                  <span className={`balance-amt ${net > 0 ? 'positive' : 'negative'}`}>
+                    {formatCurrency(Math.abs(net))}
+                  </span>
+                </div>
+              )}
+            </div>
           )
         })()}
       </div>
