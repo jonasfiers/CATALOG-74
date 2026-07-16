@@ -1,6 +1,8 @@
 # CATALOG-74
 
-[Splitty](https://splitty.jonasfiers.eu), sent back to 1974. Same idea — debts aren't stored, they're derived — rebuilt from scratch on the paradigm that would've been available before graph databases, live queries, or JSON existed: fixed-width flat files and nightly batch runs.
+Live at [catalog74.jonasfiers.eu](https://catalog74.jonasfiers.eu) — demo logins below.
+
+[Splitty](https://splitty.jonasfiers.eu), sent back to 1974. Same idea — a balance isn't a field you keep updated, it's something you compute from the transactions underneath — rebuilt from scratch on the paradigm that would've been available before graph databases, live queries, or JSON existed: fixed-width flat files and nightly batch runs.
 
 Splitty derives a balance by traversing a live graph on every request. CATALOG-74 derives the same balance the way a shop running COBOL on real iron would have: sort the day's transactions, run them through a control-break aggregation, merge the two results together, write the answer to a file. The balance you see is only ever as fresh as the last batch run — which is the entire point. Add an expense and the number on screen does **not** move. It's frozen until someone (or something, nightly) runs the batch.
 
@@ -14,7 +16,7 @@ Splitty derives a balance by traversing a live graph on every request. CATALOG-7
 | "Join" | `MATCH` pattern | Classic matched-merge algorithm |
 | "GROUP BY SUM()" | Cypher aggregation | Manual control-break loop |
 
-Neither is wrong. They're the same modeling idea — *balances are derived, never stored* — expressed in two paradigms forty years apart. Splitty exists because Neo4j made the "derive, don't store" idea feel natural. CATALOG-74 exists to show the same idea was already possible decades earlier, just with a lot more manual bookkeeping and an overnight wait built into the design.
+Neither is wrong. They're the same modeling idea — *a balance is computed, not incrementally maintained* — expressed in two paradigms forty years apart. Splitty computes it fresh on every read and never stores the result; CATALOG-74 computes it on a schedule and does store the result, which is exactly why it's only ever as fresh as the last batch run instead of always current. Splitty exists because Neo4j made the "compute, don't maintain" idea feel natural. CATALOG-74 exists to show the same idea was already possible decades earlier, just with a lot more manual bookkeeping and an overnight wait built into the design.
 
 ## How the batch pipeline works
 
@@ -76,6 +78,16 @@ npm run dev:web                          # web on :5173
 `api-cobol` shells out to `cobol/scripts/run-batch.sh`, which needs GnuCOBOL's `cobc` on `PATH` (`brew install gnucobol` / `apt install gnucobol4`) and the three programs compiled once: `for f in cobol/programs/*.cbl; do cobc -x -free -I cobol/copybooks -o "bin/$(basename "$f" .cbl | tr A-Z a-z)" "$f"; done`, then point `BIN_DIR` at that `bin/` folder.
 
 The web dev server proxies `/api` to `http://api:3000` by default — override with `VITE_API_TARGET` if the API isn't running at that address (e.g. `VITE_API_TARGET=http://localhost:3000`).
+
+### Docker-free (LXC / bare metal)
+
+[`deploy/provision-lxc.sh`](deploy/provision-lxc.sh) sets up the same stack without a Docker daemon in between — Node 20, nginx, and GnuCOBOL installed straight on a Debian/Ubuntu box, systemd running the API, nginx doing the same routing `web/nginx.conf` does in the container build. Useful for an LXC container where running Docker-in-Docker is more overhead than it's worth.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jonasfiers/CATALOG-74/main/deploy/provision-lxc.sh | bash
+```
+
+Reruns are safe — it pulls the latest `main` if the checkout already exists. Override `REPO_URL`, `JWT_SECRET`, `BATCH_INTERVAL_MS`, etc. via environment variables; see the script header for the full list. This is how the live demo above is actually deployed.
 
 ## License
 
