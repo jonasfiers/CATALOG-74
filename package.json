@@ -1,13 +1,12 @@
 {
-  "name": "splitty",
+  "name": "catalog-74",
   "private": true,
   "version": "1.0.0",
   "workspaces": [
-    "api",
     "web"
   ],
   "scripts": {
-    "dev:api": "npm run dev -w api",
+    "dev:api": "npm run dev --prefix api-cobol",
     "dev:web": "npm run dev -w web",
     "dev": "npm run dev:api & npm run dev:web"
   }

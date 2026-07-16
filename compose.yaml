@@ -1,48 +1,26 @@
 services:
 
-  # Neo4j Service
-  neo4j:
-    image: neo4j:latest
-    container_name: splitty_neo4j
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:7474:7474"
-      - "127.0.0.1:7687:7687"
-    environment:
-      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
-      - NEO4J_PLUGINS=["apoc"]
-      # Sized for a 2GB host, matching what's already tuned on the server.
-      - NEO4J_server_memory_heap_initial__size=512m
-      - NEO4J_server_memory_heap_max__size=1g
-      - NEO4J_server_memory_pagecache_size=256m
-    mem_limit: 1.5g
-    volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-    networks:
-      - splitty-network
-    healthcheck:
-      test: ["CMD", "neo4j", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # API Service
+  # api-cobol -- Node/Express adapter over the flat files, plus the
+  # compiled COBOL batch programs it shells out to. The data volume
+  # below is the "DASD": flat files that persist across restarts and
+  # are seeded from cobol/seed-data on first boot (see
+  # api-cobol/docker-entrypoint.sh).
   api:
     build:
-      context: ./api
-    image: splitty_api:latest
-    container_name: splitty_api
+      context: .
+      dockerfile: api-cobol/Dockerfile
+    image: catalog74_api:latest
+    container_name: catalog74_api
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      neo4j:
-        condition: service_healthy
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - BATCH_INTERVAL_MS=${BATCH_INTERVAL_MS:-86400000}
+    volumes:
+      - catalog74_data:/data
     networks:
-      - splitty-network
+      - catalog74-network
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
       interval: 10s
@@ -54,8 +32,8 @@ services:
   web:
     build:
       context: ./web
-    image: splitty_web:latest
-    container_name: splitty_web
+    image: catalog74_web:latest
+    container_name: catalog74_web
     restart: unless-stopped
     ports:
       - "80:80"
@@ -63,7 +41,7 @@ services:
       api:
         condition: service_healthy
     networks:
-      - splitty-network
+      - catalog74-network
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:80/ || exit 1"]
       interval: 10s
@@ -72,10 +50,9 @@ services:
       start_period: 5s
 
 networks:
-  splitty-network:
-    name: splitty-network
+  catalog74-network:
+    name: catalog74-network
     driver: bridge
 
 volumes:
-  neo4j_data:
-  neo4j_logs:
+  catalog74_data:

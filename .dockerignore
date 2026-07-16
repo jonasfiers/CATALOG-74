@@ -1,0 +1,8 @@
+node_modules
+web/node_modules
+web/dist
+api-cobol/node_modules
+.git
+.env
+.env.local
+docs
