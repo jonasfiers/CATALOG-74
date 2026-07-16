@@ -30,7 +30,7 @@ export default function Layout() {
       {/* ── SIDEBAR (desktop) ── */}
       <aside className="app-sidebar">
         <Link to="/groups" className="sidebar-logo">
-          <span className="terminal-prompt" aria-hidden="true">&gt;_</span>
+          <span className="terminal-prompt" aria-hidden="true">=^.^=</span>
           <span>CATALOG<span className="sidebar-logo-accent">-74</span></span>
         </Link>
 
@@ -59,7 +59,7 @@ export default function Layout() {
       {/* ── HEADER (mobile) ── */}
       <header className="app-header" >
         <Link to="/groups" className="app-logo">
-            <span className="terminal-prompt" aria-hidden="true">&gt;_</span>
+            <span className="terminal-prompt" aria-hidden="true">=^.^=</span>
             <span>CATALOG<span className="app-logo-accent">-74</span></span></Link>
         <Link to="/profile" className="app-avatar">
           <Avatar name={currentUser?.name} size={28} colorIndex={currentUser?.avatarColor} emoji={currentUser?.avatarEmoji} />

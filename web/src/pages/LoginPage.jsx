@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <h1>
-          <span className="terminal-prompt" aria-hidden="true">&gt;_</span> CATALOG<span>-74</span>
+          <span className="terminal-prompt" aria-hidden="true">=^.^=</span> CATALOG<span>-74</span>
         </h1>
         <h2>Sign in to your account</h2>
         <form onSubmit={handleSubmit}>
