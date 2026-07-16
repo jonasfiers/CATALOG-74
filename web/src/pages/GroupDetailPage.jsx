@@ -50,6 +50,8 @@ export default function GroupDetailPage() {
   const [error, setError] = useState('')
   const [inviteLink, setInviteLink] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [runningBatch, setRunningBatch] = useState(false)
+  const [batchError, setBatchError] = useState('')
 
   const PAGE = 25
 
@@ -88,6 +90,19 @@ export default function GroupDetailPage() {
     setCategoryTotals(catRes.data.categories || [])
     setCategories(catsRes.data.categories || [])
   }, [id, filters, debouncedKeyword, buildQuery])
+
+  const runBatch = async () => {
+    setRunningBatch(true)
+    setBatchError('')
+    try {
+      await client.post('/batch/run')
+      await load()
+    } catch {
+      setBatchError('Batch run failed -- see api-cobol server logs.')
+    } finally {
+      setRunningBatch(false)
+    }
+  }
 
   const loadMore = async () => {
     setLoadingMore(true)
@@ -290,6 +305,18 @@ export default function GroupDetailPage() {
           )}
         </div>
       )}
+
+      <div className="batch-status">
+        <span className="batch-status-text">
+          {group?.balancesAsOf
+            ? `Balances as of ${new Date(group.balancesAsOf).toLocaleString()}`
+            : 'Balances not yet computed by a batch run'}
+        </span>
+        <button className="btn-pill-white" disabled={runningBatch} onClick={runBatch}>
+          {runningBatch ? 'Running batch…' : 'Run batch now'}
+        </button>
+      </div>
+      {batchError && <p className="error">{batchError}</p>}
 
       {/* Tabs */}
       <div className="filter-chips">

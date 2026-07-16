@@ -1,12 +1,14 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Avatar } from './Avatar.jsx'
-import CatAvatar from './CatAvatar/CatAvatar'
 
+// Activity/Insights/Friends had no backing endpoints left once this
+// became a batch-processed COBOL demo instead of a live graph query
+// -- api-cobol only implements groups/expenses/balances, so those
+// tabs would just be dead links. See App.jsx for the matching route
+// trim.
 const NAV_ITEMS = [
-  { to: '/groups',     end: true, label: 'Home',       icon: HomeIcon       },
-  { to: '/activity',             label: 'Activity',   icon: ActivityIcon   },
-  { to: '/insights',             label: 'Insights',   icon: InsightsIcon   },
+  { to: '/groups', end: true, label: 'Home', icon: HomeIcon },
 ]
 
 function HomeIcon({ size = 20 }) {
@@ -14,24 +16,6 @@ function HomeIcon({ size = 20 }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-  )
-}
-
-function ActivityIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-    </svg>
-  )
-}
-
-function InsightsIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10"/>
-      <line x1="12" y1="20" x2="12" y2="4"/>
-      <line x1="6" y1="20" x2="6" y2="14"/>
     </svg>
   )
 }
@@ -46,8 +30,8 @@ export default function Layout() {
       {/* ── SIDEBAR (desktop) ── */}
       <aside className="app-sidebar">
         <Link to="/groups" className="sidebar-logo">
-          <CatAvatar className="sidebar-logo-icon" />
-          <span>Split<span className="sidebar-logo-accent">ty</span></span>
+          <span className="terminal-prompt" aria-hidden="true">&gt;_</span>
+          <span>CATALOG<span className="sidebar-logo-accent">-74</span></span>
         </Link>
 
         <nav className="sidebar-nav">
@@ -75,8 +59,8 @@ export default function Layout() {
       {/* ── HEADER (mobile) ── */}
       <header className="app-header" >
         <Link to="/groups" className="app-logo">
-            <CatAvatar className="app-logo-icon" />
-            <span>Split<span className="app-logo-accent">ty</span></span></Link>
+            <span className="terminal-prompt" aria-hidden="true">&gt;_</span>
+            <span>CATALOG<span className="app-logo-accent">-74</span></span></Link>
         <Link to="/profile" className="app-avatar">
           <Avatar name={currentUser?.name} size={28} colorIndex={currentUser?.avatarColor} emoji={currentUser?.avatarEmoji} />
         </Link>

@@ -1,40 +1,44 @@
 /* ══════════════════════════════════════════
-   TOKENS
+   TOKENS — phosphor green-screen terminal.
+   Same variable names as the Splitty original (so all 1800+ lines
+   of component CSS below need zero changes), different values.
+   No true red: monochrome CRTs didn't have one, so "owed" balances
+   use amber instead, the classic secondary alert color.
 ══════════════════════════════════════════ */
 :root {
-  --accent:        #E8603A;
-  --accent-light:  #FEF0EB;
-  --accent-hover:  #D4512B;
-  --accent-subtle: #FDE2D8;
+  --accent:        #9CFF9C;
+  --accent-light:  #0F2A16;
+  --accent-hover:  #C6FFC6;
+  --accent-subtle: #163A1E;
 
-  --green:       #059669;
-  --green-light: #D1FAE5;
-  --green-dark:  #047857;
-  --red:         #DC2626;
-  --red-light:   #FEE2E2;
-  --red-dark:    #B91C1C;
+  --green:       #4AF626;
+  --green-light: #0F2A16;
+  --green-dark:  #7FFF7F;
+  --red:         #FF9F1C;
+  --red-light:   #2A1E0A;
+  --red-dark:    #FFC978;
 
   /* Sidebar */
-  --sb-bg:        #4A2C0E;
-  --sb-border:    rgba(255,255,255,0.09);
-  --sb-text:      #C49A6C;
-  --sb-text-hover:#FDF6EE;
-  --sb-active-bg: rgba(255,255,255,0.12);
-  --sb-active:    #FDF6EE;
+  --sb-bg:        #04100A;
+  --sb-border:    rgba(74,246,38,0.18);
+  --sb-text:      #2E8A1A;
+  --sb-text-hover:#9CFF9C;
+  --sb-active-bg: rgba(74,246,38,0.12);
+  --sb-active:    #9CFF9C;
 
   /* Page */
-  --bg:           #F5F1EB;
-  --surface:      #FEFCFA;
-  --surface-2:    #F5F0E8;
-  --border:       #E8E0D4;
-  --border-strong:#D4C9BB;
+  --bg:           #06120A;
+  --surface:      #0B1F12;
+  --surface-2:    #102A18;
+  --border:       #1E4A2A;
+  --border-strong:#2E6B3F;
 
-  --text:         #1C1917;
-  --text-2:       #78716C;
-  --text-3:       #A8998E;
+  --text:         #4AF626;
+  --text-2:       #33B31C;
+  --text-3:       #1F7A11;
 
-  --font-display: 'DM Serif Display', serif;
-  --font-body:    'Plus Jakarta Sans', sans-serif;
+  --font-display: 'JetBrains Mono', monospace;
+  --font-body:    'JetBrains Mono', monospace;
   --font-mono:    'JetBrains Mono', monospace;
 
   --r-sm:   6px;
@@ -43,51 +47,55 @@
   --r-xl:   20px;
   --r-pill: 100px;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.04);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-sm: 0 0 4px rgba(74,246,38,.15);
+  --shadow-md: 0 0 10px rgba(74,246,38,.18);
+  --shadow-lg: 0 0 18px rgba(74,246,38,.22);
 
   --header-h: 56px;
   --nav-h:    64px;
   --sidebar-w: 240px;
 }
 
-/* ══════════════════════════════════════════
-   DARK MODE
-══════════════════════════════════════════ */
+/* Same green-screen theme regardless of light/dark toggle -- there's
+   no "light mode" CRT, this is the only look this app has. */
 [data-theme="dark"] {
-  --accent:        #F07452;
-  --accent-light:  #2E1E17;
-  --accent-hover:  #E8603A;
-  --accent-subtle: #3A2218;
+  --accent:        #9CFF9C;
+  --accent-light:  #0F2A16;
+  --accent-hover:  #C6FFC6;
+  --accent-subtle: #163A1E;
 
-  --green:       #34D399;
-  --green-light: #052E1C;
-  --green-dark:  #6EE7B7;
-  --red:         #F87171;
-  --red-light:   #2D1515;
-  --red-dark:    #FCA5A5;
+  --green:       #4AF626;
+  --green-light: #0F2A16;
+  --green-dark:  #7FFF7F;
+  --red:         #FF9F1C;
+  --red-light:   #2A1E0A;
+  --red-dark:    #FFC978;
 
-  --sb-bg:        #1E1008;
-  --sb-border:    rgba(255,255,255,0.07);
-  --sb-text:      #9A7550;
-  --sb-text-hover:#FDF6EE;
-  --sb-active-bg: rgba(255,255,255,0.10);
-  --sb-active:    #FDF6EE;
+  --sb-bg:        #030B06;
+  --sb-border:    rgba(74,246,38,0.14);
+  --sb-text:      #2E8A1A;
+  --sb-text-hover:#9CFF9C;
+  --sb-active-bg: rgba(74,246,38,0.10);
+  --sb-active:    #9CFF9C;
 
-  --bg:           #1C1714;
-  --surface:      #241E1A;
-  --surface-2:    #2C2420;
-  --border:       #3D3028;
-  --border-strong:#4D3D32;
+  --bg:           #030B06;
+  --surface:      #08160D;
+  --surface-2:    #0D2013;
+  --border:       #1A3F23;
+  --border-strong:#275A34;
 
-  --text:         #FAF7F4;
-  --text-2:       #B5A89A;
-  --text-3:       #7A6C61;
+  --text:         #4AF626;
+  --text-2:       #2E9E1A;
+  --text-3:       #1B6A0E;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.2);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+  --shadow-sm: 0 0 4px rgba(74,246,38,.18);
+  --shadow-md: 0 0 10px rgba(74,246,38,.22);
+  --shadow-lg: 0 0 18px rgba(74,246,38,.26);
+}
+
+.terminal-prompt {
+  font-family: var(--font-mono);
+  color: var(--accent);
 }
 
 /* ══════════════════════════════════════════
@@ -1137,6 +1145,34 @@ body {
   transition: opacity .15s;
 }
 .debt-banner-btn:hover { opacity: 1; }
+
+.batch-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--border);
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 12px;
+}
+.batch-status .btn-pill-white {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  opacity: .85;
+  transition: opacity .15s;
+}
+.batch-status .btn-pill-white:hover { opacity: 1; }
+.batch-status .btn-pill-white:disabled { opacity: .5; cursor: default; }
 
 /* Expense list */
 .expense-list {

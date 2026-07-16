@@ -6,7 +6,6 @@ import { formatCurrency } from '../utils/currency.js'
 import Loading from '../components/Loading.jsx'
 import BackLink from '../components/BackLink.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import CategoryPicker from '../components/CategoryPicker/CategoryPicker.jsx'
 
 function recalculate(shares, total, payerId) {
   const included = shares.filter(s => s.included)
@@ -33,14 +32,12 @@ export default function ExpenseFormPage() {
   const [form, setForm] = useState({
     groupId: groupId || '',
     description: '',
-    categoryId: '',
     amount: '',
     currencyIso: '',
     date: new Date().toISOString().slice(0, 10),
     paidByUserId: '',
   })
   const [shares, setShares] = useState([])
-  const [categories, setCategories] = useState([])
   const [currencies, setCurrencies] = useState([])
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -48,7 +45,6 @@ export default function ExpenseFormPage() {
 
   useEffect(() => {
     const fetches = [
-      client.get(`/categories?groupId=${groupId}`),
       client.get('/currencies'),
       ...(groupId ? [client.get(`/groups/${groupId}/members`)] : []),
       ...(groupId ? [client.get(`/groups/${groupId}`)] : [client.get('/groups')]),
@@ -58,14 +54,12 @@ export default function ExpenseFormPage() {
 
     Promise.all(fetches).then(results => {
       let idx = 0
-      const cats = results[idx++].data.categories || []
       const curs = results[idx++].data.currencies || []
       const usrs = groupId ? (results[idx++].data.members || []) : []
       const groupIso = groupId ? results[idx++]?.data?.groups?.[0]?.iso : null
       const expData = isEdit ? results[idx++]?.data : null
       const sharesData = isEdit ? results[idx]?.data : null
 
-      setCategories(cats)
       setCurrencies(curs)
       setUsers(usrs)
 
@@ -76,7 +70,6 @@ export default function ExpenseFormPage() {
           description:  e.description  || '',
           amount:       e.amount,
           date:         e.date         || f.date,
-          categoryId:   e.categoryId   || '',
           currencyIso:  e.currencyIso  || (curs[0]?.iso ?? ''),
           paidByUserId: e.paidByUserId || '',
         }))
@@ -125,11 +118,6 @@ export default function ExpenseFormPage() {
       setError('Amount must be greater than 0.')
       return
     }
-    if (!form.categoryId) {
-      setError('Please select a category.')
-      return
-    }
-
     const sharesSum = shares.filter(s => s.included).reduce((sum, s) => sum + Number(s.amount || 0), 0)
     if (sharesSum !== Number(form.amount)) {
       setError(`Shares add up to ${formatCurrency(sharesSum, form.currencyIso)} but total is ${formatCurrency(form.amount, form.currencyIso)}. Use "Split equally" or adjust the amounts.`)
@@ -237,14 +225,6 @@ export default function ExpenseFormPage() {
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
                 required
-              />
-            </div>
-            <div className="form-group">
-              <label>Category</label>
-              <CategoryPicker
-                value={form.categoryId || null}
-                onChange={id => setForm(f => ({ ...f, categoryId: id ?? '' }))}
-                categories={categories}
               />
             </div>
           </div>

@@ -5,3 +5,4 @@
        01  USER-REC.
            05  USER-ID             PIC 9(6).
            05  USER-NAME           PIC X(30).
+           05  USER-EMAIL          PIC X(40).
