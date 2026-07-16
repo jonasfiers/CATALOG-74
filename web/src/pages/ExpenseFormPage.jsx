@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import client from '../api/client'
 import CurrencyInput from '../components/CurrencyInput/CurrencyInput.jsx'
@@ -42,6 +42,13 @@ export default function ExpenseFormPage() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  // Loading an existing expense sets form.amount/paidByUserId from the
+  // server at the same time as the real per-person shares -- both land
+  // in the same render, so the recalculate effect below (which exists
+  // to even-split shares when the user changes the amount by hand)
+  // would otherwise immediately overwrite the real saved shares with a
+  // fresh even split. This skips exactly that one, load-triggered run.
+  const skipNextRecalc = useRef(false)
 
   useEffect(() => {
     const fetches = [
@@ -83,6 +90,7 @@ export default function ExpenseFormPage() {
 
       if (isEdit && sharesData?.shares?.length) {
         const shareMap = new Map(sharesData.shares.map(s => [s.userId, s]))
+        skipNextRecalc.current = true
         setShares(usrs.map(u => shareMap.has(u.id)
           ? { userId: u.id, amount: shareMap.get(u.id).amount, included: true }
           : { userId: u.id, amount: 0, included: false }
@@ -97,6 +105,10 @@ export default function ExpenseFormPage() {
   // Recalculate equal split whenever total amount changes
   useEffect(() => {
     if (shares.length === 0) return
+    if (skipNextRecalc.current) {
+      skipNextRecalc.current = false
+      return
+    }
     setShares(prev => recalculate(prev, form.amount, form.paidByUserId))
   }, [form.amount, form.paidByUserId])
 
