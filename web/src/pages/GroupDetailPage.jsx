@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import client from '../api/client'
-import CurrencyInput from '../components/CurrencyInput/CurrencyInput.jsx'
 import FabButton from '../components/FabButton/FabButton.jsx'
 import { formatCurrency, formatDate } from '../utils/currency.js'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -27,18 +26,6 @@ export default function GroupDetailPage() {
   const [balance, setBalance] = useState(null)
   const [tab, setTab] = useState('expenses')
   const [filter, setFilter] = useState('All')
-  const [showSettlement, setShowSettlement] = useState(false)
-  const [settlementForm, setSettlementForm] = useState({
-    paidByUserId: '',
-    receivedByUserId: '',
-    amount: '',
-    date: new Date().toISOString().slice(0, 10),
-  })
-  const [showTransfer, setShowTransfer] = useState(false)
-  const [transferTarget, setTransferTarget] = useState(null)
-  const [transferBilateral, setTransferBilateral] = useState(0)
-  const [sharedGroups, setSharedGroups] = useState([])
-  const [transferGroupId, setTransferGroupId] = useState('')
   const [categories, setCategories] = useState([])
   const [categoryTotals, setCategoryTotals] = useState([])
   const [filters, setFilters] = useState({ keyword: '', categoryId: null, paidByUserId: '', startDate: '', endDate: '' })
@@ -48,8 +35,6 @@ export default function GroupDetailPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [inviteLink, setInviteLink] = useState(null)
-  const [copied, setCopied] = useState(false)
   const [runningBatch, setRunningBatch] = useState(false)
   const [batchError, setBatchError] = useState('')
 
@@ -150,84 +135,6 @@ export default function GroupDetailPage() {
 
   const handleNewExpense = () => navigate(`/groups/${id}/expenses/new`);
 
-  const handleInvite = async () => {
-    try {
-      const { data } = await client.post(`/invites/groups/${id}`)
-      setInviteLink(`${window.location.origin}/invite/${data.token}`)
-    } catch { setError('Failed to generate invite link.') }
-  }
-
-  const handleSettlement = async e => {
-    e.preventDefault()
-    setError('')
-    try {
-      await client.post('/settlements', {
-        ...settlementForm,
-        groupId: id,
-        currencyIso: group.iso,
-        amount: Number(settlementForm.amount),
-      })
-      setShowSettlement(false)
-      await load()
-    } catch {
-      setError('Failed to record settlement.')
-    }
-  }
-
-  const openSettlement = (member) => {
-    // member.balance is their net balance in the group: sum(lent) - sum(owed)
-    // If member.balance < 0, they owe money (they should pay).
-    // If member.balance > 0, they are owed money (they should receive).
-    
-    if (member.balance < 0) {
-      // Member owes money -> They are the payer
-      setSettlementForm({
-        paidByUserId: member.id,
-        receivedByUserId: currentUser.id,
-        amount: Math.abs(member.balance),
-        date: new Date().toISOString().slice(0, 10),
-      })
-    } else {
-      // Member is owed money -> They are the receiver
-      setSettlementForm({
-        paidByUserId: currentUser.id,
-        receivedByUserId: member.id,
-        amount: Math.abs(member.balance),
-        date: new Date().toISOString().slice(0, 10),
-      })
-    }
-    setShowSettlement(true)
-  }
-
-  const openTransfer = async (member) => {
-    try {
-      const res = await client.get(`/groups/${id}/shared-groups/${member.id}`)
-      setSharedGroups(res.data.groups || [])
-      setTransferBilateral(res.data.bilateralBalance ?? 0)
-      setTransferTarget(member)
-      setTransferGroupId(res.data.groups?.[0]?.id || '')
-      setShowTransfer(true)
-    } catch {
-      setError('Could not load shared groups.')
-    }
-  }
-
-  const handleTransfer = async e => {
-    e.preventDefault()
-    setError('')
-    try {
-      await client.post('/settlements/transfer', {
-        sourceGroupId: id,
-        targetGroupId: transferGroupId,
-        targetUserId: transferTarget.id,
-      })
-      setShowTransfer(false)
-      await load()
-    } catch {
-      setError('Failed to transfer balance.')
-    }
-  }
-
   if (loading) return <Loading />
   if (!group) return <div className="empty-state"><p className="empty-state-title">Group not found.</p></div>
 
@@ -287,20 +194,10 @@ export default function GroupDetailPage() {
           ) : balance.amount > 0 ? (
             <div className="debt-banner owed">
               <span className="debt-banner-text">You are owed {formatCurrency(balance.amount, balance.iso)}</span>
-              <button className="btn-pill-white" style={{ marginLeft: 'auto', color: 'inherit' }} onClick={() => {
-                const owers = members.filter(m => m.id !== currentUser.id && m.balance < 0)
-                if (owers.length === 1) openSettlement(owers[0])
-                else setShowSettlement(true)
-              }}>Settle up</button>
             </div>
           ) : (
             <div className="debt-banner owes">
               <span className="debt-banner-text">You owe {formatCurrency(Math.abs(balance.amount), balance.iso)}</span>
-              <button className="btn-pill-white" style={{ marginLeft: 'auto', color: 'inherit' }} onClick={() => {
-                const lenders = members.filter(m => m.id !== currentUser.id && m.balance > 0)
-                if (lenders.length === 1) openSettlement(lenders[0])
-                else setShowSettlement(true)
-              }}>Settle up</button>
             </div>
           )}
         </div>
@@ -524,16 +421,6 @@ export default function GroupDetailPage() {
                 {m.balance ? formatCurrency(Math.abs(m.balance), balance?.iso) : '—'}
               </span>
               <div className="member-actions">
-                {m.id !== currentUser.id && m.balance !== 0 && (
-                  <>
-                    <button className="btn-pill-outline" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => openSettlement(m)}>
-                      Settle
-                    </button>
-                    <button className="btn-pill-outline" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => openTransfer(m)}>
-                      Transfer
-                    </button>
-                  </>
-                )}
                 <button className="member-rm-btn" onClick={() => handleRemoveMember(m.id)} title="Remove">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="3 6 5 6 21 6"/>
@@ -545,134 +432,10 @@ export default function GroupDetailPage() {
               </div>
             </div>
           ))}
-
-          <button className="btn-pill-outline" style={{ marginTop: 12, width: '100%', padding: '10px' }} onClick={handleInvite}>
-            Invite via link
-          </button>
-
         </div>
       </>}
 
       <FabButton onClick={handleNewExpense} label="Add expense" />
-
-      {/* Invite sheet */}
-      {inviteLink && (
-        <div className="sheet-overlay" onClick={e => { if (e.target === e.currentTarget) setInviteLink(null) }}>
-          <div className="sheet">
-            <div className="sheet-handle" />
-            <p className="sheet-title">Invite to group</p>
-            <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 16 }}>Share this link. It expires in 7 days and can only be used once.</p>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--surface-2)', borderRadius: 8, padding: '10px 12px', marginBottom: 16, wordBreak: 'break-all', fontSize: 13 }}>
-              <span style={{ flex: 1 }}>{inviteLink}</span>
-            </div>
-            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => { navigator.clipboard.writeText(inviteLink); setCopied(true); setTimeout(() => setCopied(false), 2000) }}>
-              {copied ? 'Link copied!' : 'Copy link'}
-            </button>
-            <button className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }} onClick={() => { setInviteLink(null); setCopied(false) }}>Close</button>
-          </div>
-        </div>
-      )}
-
-      {/* Balance transfer sheet */}
-      {showTransfer && (
-        <div className="sheet-overlay" onClick={e => { if (e.target === e.currentTarget) setShowTransfer(false) }}>
-          <div className="sheet">
-            <div className="sheet-handle" />
-            <p className="sheet-title">Transfer balance</p>
-            {sharedGroups.length === 0 ? (
-              <>
-                <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 16 }}>
-                  You and {transferTarget?.name} don't share any other groups to transfer the balance to.
-                </p>
-                <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => setShowTransfer(false)}>Close</button>
-              </>
-            ) : transferBilateral === 0 ? (
-              <>
-                <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 16 }}>
-                  You have no direct balance with {transferTarget?.name} in this group to transfer.
-                </p>
-                <button className="btn btn-ghost" style={{ width: '100%' }} onClick={() => setShowTransfer(false)}>Close</button>
-              </>
-            ) : (
-              <form onSubmit={handleTransfer}>
-                <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 16 }}>
-                  Move the full balance of {formatCurrency(Math.abs(transferBilateral), balance?.iso)} with {transferTarget?.name} from this group to:
-                </p>
-                <div className="form-group">
-                  <label>Destination group</label>
-                  <select
-                    value={transferGroupId}
-                    onChange={e => setTransferGroupId(e.target.value)}
-                    required
-                  >
-                    {sharedGroups.map(g => (
-                      <option key={g.id} value={g.id}>{g.icon} {g.title}</option>
-                    ))}
-                  </select>
-                </div>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Transfer balance</button>
-                <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }} onClick={() => setShowTransfer(false)}>Cancel</button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Settlement sheet */}
-      {showSettlement && (
-        <div className="sheet-overlay" onClick={e => { if (e.target === e.currentTarget) setShowSettlement(false) }}>
-          <div className="sheet">
-            <div className="sheet-handle" />
-            <p className="sheet-title">Record a settlement</p>
-            <form onSubmit={handleSettlement}>
-              <div className="form-group">
-                <label>Who paid?</label>
-                <select
-                  value={settlementForm.paidByUserId}
-                  onChange={e => setSettlementForm(f => ({ ...f, paidByUserId: e.target.value }))}
-                  required
-                >
-                  <option value="">Select user…</option>
-                  {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Who received?</label>
-                <select
-                  value={settlementForm.receivedByUserId}
-                  onChange={e => setSettlementForm(f => ({ ...f, receivedByUserId: e.target.value }))}
-                  required
-                >
-                  <option value="">Select user…</option>
-                  {members.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Amount</label>
-                <CurrencyInput
-                  iso={group.iso}
-                  value={settlementForm.amount}
-                  onChange={val => setSettlementForm(f => ({ ...f, amount: val }))}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Date</label>
-                <input
-                  type="date"
-                  value={settlementForm.date}
-                  onChange={e => setSettlementForm(f => ({ ...f, date: e.target.value }))}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Record settlement</button>
-              <button type="button" className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }} onClick={() => setShowSettlement(false)}>
-                Cancel
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   )
 }
