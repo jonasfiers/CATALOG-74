@@ -170,8 +170,13 @@ server {
         add_header Cache-Control "public, max-age=604800" always;
     }
 
+    # SPA fallback only for the app's client-side routes; anything else is a real 404
+    location ~ ^/(login|groups|profile)(/|\$) {
+        try_files \$uri /index.html;
+    }
+
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files \$uri \$uri/ =404;
     }
 }
 EOF
